@@ -44,4 +44,8 @@ public class EmployeeController {
         return "đã xóa nhân viên với id: " + id;
     }
 
+    @PostMapping("/{empId}/cap-phat/{deviceId}")
+    public Employee capPhat(@PathVariable Long empId, @PathVariable Long deviceId) {
+        return service.capPhatThietBi(empId, deviceId);
+    }
 }
