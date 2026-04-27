@@ -31,3 +31,21 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# ===== FRONTEND (Vue.js) =====
+frontend/node_modules/
+frontend/.dist/
+frontend/.cache/
+frontend/dist/
+frontend/.env.local
+frontend/.env.*.local
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+frontend/.DS_Store
+frontend/**/*.sw[op]
+frontend/**/.DS_Store
+frontend/**/dist-ssr
+frontend/**/*.egg-info
+frontend/**/.pytest_cache
+frontend/**/.coverage
