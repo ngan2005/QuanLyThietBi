@@ -22,6 +22,19 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
     Optional<Employee> findByCodeAndIsActiveTrue(String code);
 
     // Tìm kiếm theo tên, không phân biệt hoa thường, chỉ trong nhân viên còn hiệu lực
-    @Query("SELECT e FROM Employee e WHERE LOWER(e.tenNV) LIKE LOWER(CONCAT('%', :keyword, '%')) AND e.isActive = true")
+    @Query("""
+            select e 
+            from Employee e
+            left join e.dsThietBi ds
+            where e.isActive=true 
+                        and (
+                       lower(e.tenNV) like lower(concat('%', :keyword, '%') ) 
+                       or lower(e.chucVu) like lower(concat('%', : keyword, '%') )
+                       or lower(ds.deviceTen) like lower(concat('%', :keyword, '%') )
+                       or lower(ds.deviceLoai) like lower(concat('%', :keyword, '%') )
+                       or lower(ds.code) like lower(concat('%', :keyword, '%') ) 
+                       )  
+            """)
+//    @Query("SELECT e FROM Employee e WHERE LOWER(e.tenNV) LIKE LOWER(CONCAT('%', :keyword, '%')) AND e.isActive = true")
     List<Employee> timTheoTen(@Param("keyword") String keyword);
 }

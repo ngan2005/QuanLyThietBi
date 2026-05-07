@@ -13,7 +13,6 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class DevicesInfo {
-    private Long id;
     private String code;
     private String deviceTen;
     private String deviceLoai;

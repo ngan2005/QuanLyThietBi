@@ -10,10 +10,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class EmployeeInfo {
-
-    private Long id;
+    private String id;
     private String code;
     private String tenNV;
     private String chucVu;
-
 }

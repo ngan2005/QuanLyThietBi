@@ -3,8 +3,10 @@ package com.example.QuanLyThietBi.service;
 import org.springframework.stereotype.Service;
 import com.example.QuanLyThietBi.model.Employee;
 import com.example.QuanLyThietBi.repository.EmployeeRepository;
+import com.example.QuanLyThietBi.dto.EmployeeInfo;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.example.QuanLyThietBi.model.Device;
 import com.example.QuanLyThietBi.repository.DeviceRepository;
@@ -73,5 +75,44 @@ public class EmployeeService {
     // Tìm kiếm chỉ trong những nhân viên còn hiệu lực (dùng @Query JPQL)
     public List<Employee> search(String name) {
         return repo.timTheoTen(name);
+    }
+
+    // ============ CONVERSION: Entity → DTO ============
+    
+    /**
+     * Chuyển đổi Employee Entity thành EmployeeInfo DTO
+     * Dùng Builder Pattern để tạo DTO từ Entity
+     */
+    public EmployeeInfo convertToDTO(Employee employee) {
+        return EmployeeInfo.builder()
+                .id(String.valueOf(employee.getId()))
+                .code(employee.getCode())
+                .tenNV(employee.getTenNV())
+                .chucVu(employee.getChucVu())
+                .build();
+    }
+
+    /**
+     * Chuyển đổi List Employee thành List EmployeeInfo DTO
+     * Dùng Stream API để map từng Employee thành DTO
+     */
+    public List<EmployeeInfo> convertToDTOList(List<Employee> employees) {
+        return employees.stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Lấy tất cả nhân viên và trả về dưới dạng DTO
+     */
+    public List<EmployeeInfo> findAllDTO() {
+        return convertToDTOList(findAll());
+    }
+
+    /**
+     * Lấy nhân viên theo mã và trả về dưới dạng DTO
+     */
+    public EmployeeInfo findOneDTO(String code) {
+        return convertToDTO(findOne(code));
     }
 }

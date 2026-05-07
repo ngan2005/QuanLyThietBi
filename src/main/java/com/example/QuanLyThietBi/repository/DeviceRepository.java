@@ -22,6 +22,14 @@ public interface DeviceRepository extends JpaRepository<Device, Long> {
     Optional<Device> findByCodeAndIsActiveTrue(String code);
 
     // Tìm kiếm thiết bị còn hiệu lực theo tên
-    @Query("select d from Device d where lower(d.deviceTen) like lower(concat('%', :keyword, '%' ) ) and d.isActive = true ")
+    @Query(value = """
+            select d
+            from Device d 
+            where (
+                        lower(d.deviceTen) like lower(concat('%', :keyword, '%'))
+                         or str(d.soLuong) like concat('%', :keyword, '%') or lower(d.deviceLoai) like lower(concat('%', :keyword, '%'))     
+                                            )
+            and d.isActive = true
+            """)
     List<Device> timDeviceTen(@Param("keyword") String keyword);
 }
