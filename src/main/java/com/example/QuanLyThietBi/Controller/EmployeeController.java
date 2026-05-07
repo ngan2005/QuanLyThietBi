@@ -1,6 +1,5 @@
 package com.example.QuanLyThietBi.Controller;
 
-
 import com.example.QuanLyThietBi.model.Employee;
 import com.example.QuanLyThietBi.service.EmployeeService;
 import org.springframework.web.bind.annotation.*;
@@ -16,14 +15,15 @@ public class EmployeeController {
         this.service = service;
     }
 
+    // Chỉ trả về nhân viên còn hiệu lực (isActive = true)
     @GetMapping
     public List<Employee> findAll() {
         return service.findAll();
     }
 
-    @GetMapping("/{id}")
-    public Employee findById(@PathVariable Long id) {
-        return service.findOne(id);
+    @GetMapping("/{code}")
+    public Employee findByCode(@PathVariable String code) {
+        return service.findOne(code);
     }
 
     @PostMapping
@@ -31,21 +31,29 @@ public class EmployeeController {
         return service.save(employee);
     }
 
-    @PutMapping("/{id}")
-    public Employee update(@PathVariable Long id, @RequestBody Employee employee) {
-        // Cập nhật ID từ đường dẫn vào đối tượng employee, sau đó lưu lại
-        employee.setId(id);
+    @PutMapping("/{code}")
+    public Employee update(@PathVariable String code, @RequestBody Employee employee) {
+        Employee existing = service.findOne(code);
+        employee.setId(existing.getId());
+        employee.setCode(existing.getCode());
         return service.save(employee);
     }
 
-    @DeleteMapping("/{id}")
-    public String deleteById(@PathVariable Long id) {
-        service.delete(id);
-        return "đã xóa nhân viên với id: " + id;
+    // Soft delete: set isActive = false thay vì xóa vật lý
+    @DeleteMapping("/{code}")
+    public String deleteByCode(@PathVariable String code) {
+        service.delete(code);
+        return "Đã vô hiệu hóa nhân viên với mã: " + code;
     }
 
-    @PostMapping("/{empId}/cap-phat/{deviceId}")
-    public Employee capPhat(@PathVariable Long empId, @PathVariable Long deviceId) {
-        return service.capPhatThietBi(empId, deviceId);
+    @PostMapping("/{empCode}/cap-phat/{deviceCode}")
+    public Employee capPhat(@PathVariable String empCode, @PathVariable String deviceCode) {
+        return service.capPhatThietBi(empCode, deviceCode);
+    }
+
+    // Tìm kiếm chỉ trong nhân viên còn hiệu lực
+    @GetMapping("/search")
+    public List<Employee> searchByName(@RequestParam("name") String keyword) {
+        return service.search(keyword);
     }
 }

@@ -19,30 +19,38 @@ public class EmployeeService {
         this.deviceRepo = deviceRepo;
     }
 
+    // Chỉ trả về nhân viên còn hiệu lực (isActive = true)
     public List<Employee> findAll() {
-        return repo.findAll();
+        return repo.findByIsActiveTrue();
     }
 
-    public Employee findOne(Long id) {
-        return repo.findById(id)
-                .orElseThrow(() -> new RuntimeException("không tìm thấy mã nhân viên: " + id));
-
+    public Employee findOne(String code) {
+        return repo.findByCodeAndIsActiveTrue(code)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy nhân viên với mã: " + code));
     }
 
     public Employee save(Employee employee) {
+        // Đảm bảo isActive = true khi tạo mới
+        if (employee.getIsActive() == null) {
+            employee.setIsActive(true);
+        }
         return repo.save(employee);
     }
 
-    public void delete(Long id) {
-        repo.deleteById(id);
+    // Soft delete: không xóa vật lý, chỉ set isActive = false
+    public void delete(String code) {
+        Employee employee = repo.findByCode(code)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy nhân viên với mã: " + code));
+        employee.setIsActive(false);
+        repo.save(employee);
     }
 
-    public Employee capPhatThietBi(Long employeeId, Long deviceId) {
-        Employee emp = repo.findById(employeeId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy mã nhân viên: " + employeeId));
-        
-        Device dev = deviceRepo.findById(deviceId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy mã thiết bị: " + deviceId));
+    public Employee capPhatThietBi(String employeeCode, String deviceCode) {
+        Employee emp = repo.findByCodeAndIsActiveTrue(employeeCode)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy nhân viên với mã: " + employeeCode));
+
+        Device dev = deviceRepo.findByCodeAndIsActiveTrue(deviceCode)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy thiết bị với mã: " + deviceCode));
 
         if (emp.getDsThietBi().size() >= 2) {
             throw new RuntimeException("Nhân viên này đã mượn tối đa 2 thiết bị!");
@@ -54,11 +62,16 @@ public class EmployeeService {
 
         // Thêm thiết bị cho nhân viên
         emp.getDsThietBi().add(dev);
-        
+
         // Trừ đi 1 trong kho
         dev.setSoLuong(dev.getSoLuong() - 1);
         deviceRepo.save(dev);
-        
+
         return repo.save(emp);
+    }
+
+    // Tìm kiếm chỉ trong những nhân viên còn hiệu lực (dùng @Query JPQL)
+    public List<Employee> search(String name) {
+        return repo.timTheoTen(name);
     }
 }

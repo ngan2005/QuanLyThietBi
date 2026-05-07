@@ -21,10 +21,10 @@ public class DeviceController {
         return service.findAll();
     }
 
-    // GET /devices/1 — lấy thiết bị theo id
-    @GetMapping("/{id}")
-    public Device findOne(@PathVariable Long id) {
-        return service.findOne(id);
+    // GET /devices/{code} — lấy thiết bị theo code
+    @GetMapping("/{code}")
+    public Device findOne(@PathVariable String code) {
+        return service.findOne(code);
     }
 
     // POST /devices — thêm thiết bị mới
@@ -33,10 +33,23 @@ public class DeviceController {
         return service.save(device);
     }
 
-    // DELETE /devices/1 — xóa thiết bị theo id
-    @DeleteMapping("/{id}")
-    public String delete(@PathVariable Long id) {
-        service.delete(id);
-        return "Đã xóa thiết bị id: " + id;
+    // DELETE /devices/{code} — xóa thiết bị theo code
+    @DeleteMapping("/{code}")
+    public String delete(@PathVariable String code) {
+        service.delete(code);
+        return "Đã xóa thiết bị mã: " + code;
+    }
+
+    @PutMapping("/{code}")
+    public Device update(@PathVariable String code, @RequestBody Device device) {
+        Device existing = service.findOne(code);
+        device.setId(existing.getId());
+        device.setCode(existing.getCode());
+        return service.save(device);
+    }
+
+    @GetMapping("/search")
+    public List<Device> search(@RequestParam String keyword) {
+        return service.search(keyword);
     }
 }

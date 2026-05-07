@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-
 public class DeviceService {
     private final DeviceRepository repo;
 
@@ -16,19 +15,34 @@ public class DeviceService {
         this.repo = repo;
     }
 
+    // Chỉ trả về thiết bị còn hiệu lực (isActive = true)
     public List<Device> findAll() {
-        return repo.findAll();
+        return repo.findByIsActiveTrue();
     }
 
-    public Device findOne(Long id) {
-        return repo.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy: " + id));
-
+    public Device findOne(String code) {
+        return repo.findByCodeAndIsActiveTrue(code)
+                .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy thiết bị với mã: " + code));
     }
+
     public Device save(Device device) {
+        // Đảm bảo isActive = true khi tạo mới
+        if (device.getIsActive() == null) {
+            device.setIsActive(true);
+        }
         return repo.save(device);
     }
-    public void delete(Long id) {
-        repo.deleteById(id);
+
+    // Soft delete: không xóa vật lý, chỉ set isActive = false
+    public void delete(String code) {
+        Device device = repo.findByCode(code)
+                .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy thiết bị với mã: " + code));
+        device.setIsActive(false);
+        repo.save(device);
+    }
+
+    // Tìm kiếm chỉ trong những thiết bị còn hiệu lực
+    public List<Device> search(String keyword) {
+        return  repo.timDeviceTen(keyword);
     }
 }

@@ -15,7 +15,7 @@
 
     <!-- Form nhập liệu (Ẩn/Hiện) -->
     <div v-if="hienThiForm" class="form-box">
-      <h3>{{ form.id ? 'Sửa Nhân Viên' : 'Thêm Nhân Viên' }}</h3>
+      <h3>{{ form.code ? 'Sửa Nhân Viên' : 'Thêm Nhân Viên' }}</h3>
       <div class="input-group">
         <input v-model="form.tenNV" placeholder="Họ và tên..." class="input-box" />
         <input v-model="form.chucVu" placeholder="Chức vụ..." class="input-box" />
@@ -28,9 +28,9 @@
     <div v-if="hienThiFormCapPhat" class="form-box assign-box">
       <h3>Cấp thiết bị cho: {{ nhanVienDuocChon?.tenNV }}</h3>
       <div class="input-group">
-        <select v-model="formCapPhat.deviceId" class="input-box">
+        <select v-model="formCapPhat.deviceCode" class="input-box">
           <option value="" disabled>-- Chọn thiết bị --</option>
-          <option v-for="tb in thietBiSanSang" :key="tb.id" :value="tb.id">
+          <option v-for="tb in thietBiSanSang" :key="tb.code" :value="tb.code">
             {{ tb.deviceTen }} (Còn: {{ tb.soLuong }})
           </option>
         </select>
@@ -43,30 +43,34 @@
     <table class="basic-table">
       <thead>
         <tr>
-          <th>ID</th>
+          <th>Code</th>
           <th>Họ và Tên</th>
           <th>Chức vụ</th>
           <th>Thiết bị đang mượn</th>
+          <th>Ngày tạo</th>
+          <th>Cập nhật lần cuối</th>
           <th>Hành động</th>
         </tr>
       </thead>
       <tbody>
-        <tr v-for="nv in danhSachNV" :key="nv.id">
-          <td>{{ nv.id }}</td>
+        <tr v-for="nv in danhSachNV" :key="nv.code">
+          <td>{{ nv.code }}</td>
           <td>{{ nv.tenNV }}</td>
           <td>{{ nv.chucVu }}</td>
           <td>
             <div v-if="layDanhSachThietBi(nv).length > 0">
               <span v-for="(tb, index) in layDanhSachThietBi(nv)" :key="index" class="device-badge">
-                {{ tb.deviceTen || tb.ten || 'TB ID: ' + (tb.id || tb) }}
+                {{ tb.deviceTen || tb.ten || 'TB Code: ' + (tb.code || tb) }}
               </span>
             </div>
             <span v-else>Không có</span>
           </td>
+          <td>{{ formatNgay(nv.createdAt) }}</td>
+          <td>{{ formatNgay(nv.updatedAt) }}</td>
           <td>
             <button class="btn-assign" @click="moFormCapPhat(nv)">Cấp thiết bị</button>
             <button class="btn-edit" @click="moFormSua(nv)">Sửa</button>
-            <button class="btn-delete" @click="xoaNhanVien(nv.id)">Xóa</button>
+            <button class="btn-delete" @click="xoaNhanVien(nv.code)">Xóa</button>
           </td>
         </tr>
       </tbody>
@@ -84,17 +88,17 @@ export default {
       danhSachNV: [],
       tuKhoa: '',
       hienThiForm: false,
-      form: { id: null, tenNV: '', chucVu: '' },
+      form: { code: null, tenNV: '', chucVu: '' },
       
       // Dữ liệu cho cấp phát thiết bị
       hienThiFormCapPhat: false,
       nhanVienDuocChon: null,
       thietBiSanSang: [],
-      formCapPhat: { empId: null, deviceId: '' }
+      formCapPhat: { empCode: null, deviceCode: '' }
     }
   },
   methods: {
-    // 1. Tải danh sách
+    // 1. Tải danh sách (backend tự lọc isActive = true)
     async taiDanhSach() {
       try {
         const ketQua = await employeeService.getAll()
@@ -104,7 +108,7 @@ export default {
       }
     },
 
-    // 2. Tìm kiếm
+    // 2. Tìm kiếm (backend tự lọc isActive = true)
     async timKiem() {
       try {
         if (this.tuKhoa.trim() === '') {
@@ -124,16 +128,23 @@ export default {
       return nv.dsThietBi || nv.devices || nv.thietBis || []
     },
 
+    // Format ngày giờ hiển thị
+    formatNgay(chuoi) {
+      if (!chuoi) return '—'
+      const d = new Date(chuoi)
+      return d.toLocaleString('vi-VN')
+    },
+
     // 3. Mở form thêm
     moFormThem() {
-      this.form = { id: null, tenNV: '', chucVu: '' }
+      this.form = { code: null, tenNV: '', chucVu: '' }
       this.hienThiForm = true
       this.hienThiFormCapPhat = false
     },
 
     // 4. Mở form sửa
     moFormSua(nv) {
-      this.form = { id: nv.id, tenNV: nv.tenNV, chucVu: nv.chucVu }
+      this.form = { code: nv.code, tenNV: nv.tenNV, chucVu: nv.chucVu }
       this.hienThiForm = true
       this.hienThiFormCapPhat = false
     },
@@ -147,8 +158,8 @@ export default {
       }
       
       this.nhanVienDuocChon = nv;
-      this.formCapPhat.empId = nv.id;
-      this.formCapPhat.deviceId = '';
+      this.formCapPhat.empCode = nv.code;
+      this.formCapPhat.deviceCode = '';
       
       try {
         const ketQua = await thietbiService.getAll();
@@ -170,15 +181,15 @@ export default {
 
     // Xử lý cấp phát
     async capPhatThietBi() {
-      if (!this.formCapPhat.deviceId) {
+      if (!this.formCapPhat.deviceCode) {
         return alert("Vui lòng chọn một thiết bị!");
       }
       
       try {
-        await employeeService.capPhat(this.formCapPhat.empId, this.formCapPhat.deviceId);
+        await employeeService.capPhat(this.formCapPhat.empCode, this.formCapPhat.deviceCode);
         alert("Cấp thiết bị thành công!");
         this.hienThiFormCapPhat = false;
-        this.taiDanhSach(); // Tải lại danh sách
+        this.taiDanhSach();
       } catch (loi) {
         alert("Cấp thiết bị thất bại: " + (loi.response?.data?.message || loi.message));
       }
@@ -188,20 +199,20 @@ export default {
     async luuNhanVien() {
       if (!this.form.tenNV) return alert("Vui lòng nhập tên!")
 
-      if (this.form.id) {
-        await employeeService.update(this.form.id, this.form) // Sửa
+      if (this.form.code) {
+        await employeeService.update(this.form.code, this.form)
       } else {
-        await employeeService.create(this.form) // Thêm
+        await employeeService.create(this.form)
       }
       
       this.hienThiForm = false
       this.taiDanhSach()
     },
 
-    // 6. Xóa
-    async xoaNhanVien(id) {
-      if (confirm("Bạn có chắc muốn xóa?")) {
-        await employeeService.delete(id)
+    // 6. Xóa (soft delete — backend chuyển isActive = false)
+    async xoaNhanVien(code) {
+      if (confirm("Bạn có chắc muốn xóa nhân viên này?\n(Nhân viên sẽ bị vô hiệu hóa, không hiển thị trên danh sách)")) {
+        await employeeService.delete(code)
         this.taiDanhSach()
       }
     }
@@ -213,7 +224,7 @@ export default {
 </script>
 
 <style scoped>
-.container { padding: 20px; max-width: 1000px; margin: 0 auto; }
+.container { padding: 20px; max-width: 1100px; margin: 0 auto; }
 .toolbar { display: flex; gap: 10px; margin-bottom: 20px; }
 .input-box { flex: 1; padding: 10px; border-radius: 5px; border: 1px solid #ccc; background: #fff; color: #333; }
 select.input-box { cursor: pointer; }
