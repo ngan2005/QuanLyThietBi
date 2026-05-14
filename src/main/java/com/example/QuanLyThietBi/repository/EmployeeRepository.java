@@ -35,6 +35,5 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
                        or lower(ds.code) like lower(concat('%', :keyword, '%') ) 
                        )  
             """)
-//    @Query("SELECT e FROM Employee e WHERE LOWER(e.tenNV) LIKE LOWER(CONCAT('%', :keyword, '%')) AND e.isActive = true")
     List<Employee> timTheoTen(@Param("keyword") String keyword);
 }

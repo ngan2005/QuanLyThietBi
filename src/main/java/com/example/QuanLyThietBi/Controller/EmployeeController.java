@@ -1,5 +1,6 @@
 package com.example.QuanLyThietBi.Controller;
 
+import com.example.QuanLyThietBi.form.EmployeeForm;
 import com.example.QuanLyThietBi.model.Employee;
 import com.example.QuanLyThietBi.service.EmployeeService;
 import com.example.QuanLyThietBi.dto.EmployeeInfo;
@@ -28,17 +29,20 @@ public class EmployeeController {
     }
 
     @PostMapping
-    public EmployeeInfo save(@RequestBody Employee employee) {
+    public EmployeeInfo save(@RequestBody EmployeeForm form) {
+        Employee employee = new Employee();
+        employee.setTenNV(form.getTenNV());
+        employee.setChucVu(form.getChucVu());
         Employee saved = service.save(employee);
         return service.convertToDTO(saved);  // Chuyển sang DTO trước khi trả về
     }
 
     @PutMapping("/{code}")
-    public EmployeeInfo update(@PathVariable String code, @RequestBody Employee employee) {
+    public EmployeeInfo update(@PathVariable String code, @RequestBody EmployeeForm form) {
         Employee existing = service.findOne(code);
-        employee.setId(existing.getId());
-        employee.setCode(existing.getCode());
-        Employee updated = service.save(employee);
+        existing.setTenNV(form.getTenNV());
+        existing.setChucVu(form.getChucVu());
+        Employee updated = service.save(existing);
         return service.convertToDTO(updated);  // Trả DTO
     }
 

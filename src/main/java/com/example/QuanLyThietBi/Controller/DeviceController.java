@@ -1,5 +1,7 @@
 package com.example.QuanLyThietBi.Controller;
 
+import com.example.QuanLyThietBi.dto.DeviceInfo;
+import com.example.QuanLyThietBi.form.DeviceForm;
 import com.example.QuanLyThietBi.model.Device;
 import com.example.QuanLyThietBi.service.DeviceService;
 import org.springframework.web.bind.annotation.*;
@@ -17,20 +19,27 @@ public class DeviceController {
 
     // GET /devices — lấy tất cả thiết bị
     @GetMapping
-    public List<Device> findAll() {
-        return service.findAll();
+    public List<DeviceInfo> findAll() {
+        return service.findAllDTO();
     }
 
     // GET /devices/{code} — lấy thiết bị theo code
     @GetMapping("/{code}")
-    public Device findOne(@PathVariable String code) {
-        return service.findOne(code);
+    public DeviceInfo findOne(@PathVariable String code) {
+        return service.findOneDTO(code);
     }
 
     // POST /devices — thêm thiết bị mới
     @PostMapping
-    public Device save(@RequestBody Device device) {
-        return service.save(device);
+    public DeviceInfo save(@RequestBody DeviceForm form) {
+        Device device = new Device();
+        device.setDeviceTen(form.getDeviceTen());
+        device.setDeviceLoai(form.getDeviceLoai());
+        device.setSoLuong(form.getSoLuong());
+        device.setNgayMua(form.getNgayMua());
+        device.setTinhTrang(form.getTinhTrang());
+        Device saved = service.save(device);
+        return service.convertToDTO(saved);
     }
 
     // DELETE /devices/{code} — xóa thiết bị theo code
@@ -41,15 +50,20 @@ public class DeviceController {
     }
 
     @PutMapping("/{code}")
-    public Device update(@PathVariable String code, @RequestBody Device device) {
+    public DeviceInfo update(@PathVariable String code, @RequestBody DeviceForm form) {
         Device existing = service.findOne(code);
-        device.setId(existing.getId());
-        device.setCode(existing.getCode());
-        return service.save(device);
+        existing.setDeviceTen(form.getDeviceTen());
+        existing.setDeviceLoai(form.getDeviceLoai());
+        existing.setSoLuong(form.getSoLuong());
+        existing.setNgayMua(form.getNgayMua());
+        existing.setTinhTrang(form.getTinhTrang());
+        Device updated = service.save(existing);
+        return service.convertToDTO(updated);
     }
 
     @GetMapping("/search")
-    public List<Device> search(@RequestParam String keyword) {
-        return service.search(keyword);
+    public List<DeviceInfo> search(@RequestParam String keyword) {
+        List<Device> devices = service.search(keyword);
+        return service.convertToDTOList(devices);
     }
 }

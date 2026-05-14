@@ -48,4 +48,29 @@ public class Employee {
             this.code = "NV-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
         }
     }
+
+    // Explicit Getters and Setters
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+
+    public String getCode() { return code; }
+    public void setCode(String code) { this.code = code; }
+
+    public String getTenNV() { return tenNV; }
+    public void setTenNV(String tenNV) { this.tenNV = tenNV; }
+
+    public String getChucVu() { return chucVu; }
+    public void setChucVu(String chucVu) { this.chucVu = chucVu; }
+
+    public List<Device> getDsThietBi() { return dsThietBi; }
+    public void setDsThietBi(List<Device> dsThietBi) { this.dsThietBi = dsThietBi; }
+
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+
+    public Boolean getIsActive() { return isActive; }
+    public void setIsActive(Boolean isActive) { this.isActive = isActive; }
 }

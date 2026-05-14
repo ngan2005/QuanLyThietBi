@@ -45,4 +45,35 @@ public class Device {
             this.code = "TB-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
         }
     }
+
+    // Explicit Getters and Setters
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+
+    public String getCode() { return code; }
+    public void setCode(String code) { this.code = code; }
+
+    public String getDeviceTen() { return deviceTen; }
+    public void setDeviceTen(String deviceTen) { this.deviceTen = deviceTen; }
+
+    public String getDeviceLoai() { return deviceLoai; }
+    public void setDeviceLoai(String deviceLoai) { this.deviceLoai = deviceLoai; }
+
+    public int getSoLuong() { return soLuong; }
+    public void setSoLuong(int soLuong) { this.soLuong = soLuong; }
+
+    public LocalDate getNgayMua() { return ngayMua; }
+    public void setNgayMua(LocalDate ngayMua) { this.ngayMua = ngayMua; }
+
+    public Boolean getTinhTrang() { return tinhTrang; }
+    public void setTinhTrang(Boolean tinhTrang) { this.tinhTrang = tinhTrang; }
+
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+
+    public Boolean getIsActive() { return isActive; }
+    public void setIsActive(Boolean isActive) { this.isActive = isActive; }
 }
